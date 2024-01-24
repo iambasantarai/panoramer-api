@@ -2,6 +2,9 @@ import os
 import time
 from flask import Flask, request, jsonify
 from werkzeug.utils import secure_filename
+from stitcher import Stitcher
+import cv2
+import imutils
 
 app = Flask(__name__)
 
@@ -13,6 +16,37 @@ ALLOWED_EXTENSIONS = set(["png", "jpg"])
 
 def allowed_file(filename):
     return "." in filename and filename.split(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def stitch_images(images):
+    stitcher = Stitcher()
+
+    no_of_images = len(images)
+
+    # Modify the images width and height to keep the aspect ratio the same across images
+    for i in range(no_of_images):
+        images[i] = imutils.resize(images[i], width=400)
+
+    for i in range(no_of_images):
+        images[i] = imutils.resize(images[i], height=400)
+
+    if no_of_images == 2:
+        (result, matched_points) = stitcher.image_stitch([images[0], images[1]], match_status=True)
+    else:
+        (result, matched_points) = stitcher.image_stitch([images[no_of_images - 2], images[no_of_images - 1]], match_status=True)
+        for i in range(no_of_images - 2):
+            (result, matched_points) = stitcher.image_stitch([images[no_of_images - i - 3], result], match_status=True)
+
+    # Save stitcher and matched_points images in the 'output' folder
+    output_folder = 'static/output'
+    os.makedirs(output_folder, exist_ok=True)
+
+    panorama_path = os.path.join(output_folder, 'panorama_image.jpg')
+    matched_points_path = os.path.join(output_folder, 'matched_points.jpg')
+
+    cv2.imwrite(panorama_path, result)
+    cv2.imwrite(matched_points_path, matched_points)
+
+    return panorama_path, matched_points_path
 
 @app.route("/heartbeat", methods = ["GET"])
 def heartbeat():
@@ -52,6 +86,29 @@ def upload_image():
 
     except Exception as e:
         return jsonify({"message": e}), 500
+
+@app.route("/stitch", methods=['GET'])
+def stitch_api():
+    try:
+        # Get the list of uploaded files from the 'uploads' directory
+        uploaded_files = os.listdir(UPLOAD_FOLDER)
+
+        if len(uploaded_files) < 2:
+            return jsonify({"message": "At least two images are required for stitching!"}), 400
+
+        filename = [os.path.join(UPLOAD_FOLDER, file_name) for file_name in uploaded_files]
+        images = [cv2.imread(file) for file in filename]
+
+        panorama_path, matched_points_path = stitch_images(images)
+
+        return jsonify({
+            "message": "Images stitched successfully!",
+            "panorama_image_path": panorama_path,
+            "matched_points_path": matched_points_path
+        }), 200
+
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
