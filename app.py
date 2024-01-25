@@ -14,7 +14,7 @@ UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
-ALLOWED_EXTENSIONS = set(["png", "jpg"])
+ALLOWED_EXTENSIONS = set(["png", "jpg", "jpeg"])
 
 def allowed_file(filename):
     return "." in filename and filename.split(".", 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -26,10 +26,10 @@ def stitch_images(images):
 
     # Modify the images width and height to keep the aspect ratio the same across images
     for i in range(no_of_images):
-        images[i] = imutils.resize(images[i], width=400)
+        images[i] = imutils.resize(images[i], width=800)
 
     for i in range(no_of_images):
-        images[i] = imutils.resize(images[i], height=400)
+        images[i] = imutils.resize(images[i], height=800)
 
     if no_of_images == 2:
         (result, matched_points) = stitcher.image_stitch([images[0], images[1]], match_status=True)
