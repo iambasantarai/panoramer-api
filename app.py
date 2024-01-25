@@ -5,8 +5,10 @@ from werkzeug.utils import secure_filename
 from stitcher import Stitcher
 import cv2
 import imutils
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -36,7 +38,7 @@ def stitch_images(images):
         for i in range(no_of_images - 2):
             (result, matched_points) = stitcher.image_stitch([images[no_of_images - i - 3], result], match_status=True)
 
-    # Save stitcher and matched_points images in the 'output' folder
+    # Save stitcher and matched_points images in the 'static/output' folder
     output_folder = 'static/output'
     os.makedirs(output_folder, exist_ok=True)
 

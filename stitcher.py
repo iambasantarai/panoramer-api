@@ -38,7 +38,7 @@ class Stitcher:
         return keypoints, features
 
     def get_all_possible_matches(self, featuresA, featuresB):
-        # compute the all matches using Euclidean distance. Opencv provide DescriptorMatcher_create() function for that
+        # compute the all matches using Euclidean distance
         match_instance = cv2.DescriptorMatcher_create("BruteForce")
         All_Matches = match_instance.knnMatch(featuresA, featuresB, 2)
         return All_Matches
