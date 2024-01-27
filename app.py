@@ -164,5 +164,18 @@ def generate_panorama():
         return jsonify({"message": str(e)}), 500
 
 
+@app.route("/clear-uploads", methods=["DELETE"])
+def delete_uploads():
+    try:
+        # Clear the contents of the 'uploads' folder
+        shutil.rmtree(UPLOAD_FOLDER)
+        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+        return jsonify({"message": "Uploads folder cleared successfully!"}), 200
+
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+
+
 if __name__ == "__main__":
     app.run(debug=True)
