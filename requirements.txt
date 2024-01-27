@@ -1,4 +1,6 @@
 flask
-opencv-python
-imutils
 flask-cors
+imutils
+matplotlib
+opencv-python
+scipy
