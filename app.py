@@ -1,7 +1,9 @@
 import os
 import cv2
 import time
+import shutil
 import imutils
+from pathlib import Path
 from flask import Flask, request, jsonify
 from werkzeug.utils import secure_filename
 from stitcher import Stitcher
@@ -138,11 +140,21 @@ def stitch_api():
 @app.route("/generate-panorama", methods=["POST"])
 def generate_panorama():
     try:
-        parent_folder = "/home/basanta/Code/FinalProject/panoramer-api/samples/hills"
-        img_name_list = ["h1.jpg", "h2.jpg", "h3.jpg", "h4.jpg", "h5.jpg", "h6.jpg"]
+        uploaded_files = os.listdir(UPLOAD_FOLDER)
 
-        obj = Panoramer(parent_folder=parent_folder, img_name_list=img_name_list)
-        obj.generate()
+        # sorting files
+        uploaded_files = sorted(uploaded_files, key=lambda x: int(Path(x).stem))
+
+        if len(uploaded_files) < 2:
+            return (
+                jsonify({"message": "At least two images are required for stitching!"}),
+                400,
+            )
+
+        print(uploaded_files)
+
+        panorama = Panoramer(parent_folder=UPLOAD_FOLDER, img_name_list=uploaded_files)
+        panorama.generate()
 
         return jsonify(
             {"message": "Panorama generated successfully!"},
