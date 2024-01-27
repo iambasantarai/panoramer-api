@@ -159,14 +159,36 @@ def generate_panorama():
         # get list of generated files
         results_folder = os.path.join(UPLOAD_FOLDER, "results")
         generated_files = os.listdir(results_folder)
-        generated_files_paths = [
-            os.path.join(results_folder, file_name) for file_name in generated_files
-        ]
+
+        # group the files based on their names
+        grouped_results = {
+            "sift_correspondences": [],
+            "inliers_outliers": [],
+            "panoramas": [],
+        }
+
+        for file_name in generated_files:
+            if "sift_correspondence" in file_name:
+                grouped_results["sift_correspondences"].append(
+                    os.path.join(results_folder, file_name)
+                )
+            elif "inliers" in file_name or "outliers" in file_name:
+                grouped_results["inliers_outliers"].append(
+                    os.path.join(results_folder, file_name)
+                )
+            elif "panorama" in file_name:
+                grouped_results["panoramas"].append(
+                    os.path.join(results_folder, file_name)
+                )
+
+            # sort files withing each group
+            for category, files in grouped_results.items():
+                grouped_results[category] = sorted(files)
 
         return jsonify(
             {
                 "message": "Panorama generated successfully!",
-                "results": generated_files_paths,
+                "results": grouped_results,
             },
             200,
         )
