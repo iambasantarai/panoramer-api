@@ -1,23 +1,26 @@
 import os
+import cv2
 import time
+import imutils
 from flask import Flask, request, jsonify
 from werkzeug.utils import secure_filename
 from stitcher import Stitcher
-import cv2
-import imutils
 from flask_cors import CORS
+from panoramer import *
 
 app = Flask(__name__)
 CORS(app)
 
-UPLOAD_FOLDER = 'uploads'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+UPLOAD_FOLDER = "uploads"
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024
 
 ALLOWED_EXTENSIONS = set(["png", "jpg", "jpeg"])
 
+
 def allowed_file(filename):
     return "." in filename and filename.split(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 def stitch_images(images):
     stitcher = Stitcher()
@@ -32,30 +35,38 @@ def stitch_images(images):
         images[i] = imutils.resize(images[i], height=800)
 
     if no_of_images == 2:
-        (result, matched_points) = stitcher.image_stitch([images[0], images[1]], match_status=True)
+        (result, matched_points) = stitcher.image_stitch(
+            [images[0], images[1]], match_status=True
+        )
     else:
-        (result, matched_points) = stitcher.image_stitch([images[no_of_images - 2], images[no_of_images - 1]], match_status=True)
+        (result, matched_points) = stitcher.image_stitch(
+            [images[no_of_images - 2], images[no_of_images - 1]], match_status=True
+        )
         for i in range(no_of_images - 2):
-            (result, matched_points) = stitcher.image_stitch([images[no_of_images - i - 3], result], match_status=True)
+            (result, matched_points) = stitcher.image_stitch(
+                [images[no_of_images - i - 3], result], match_status=True
+            )
 
     # Save stitcher and matched_points images in the 'static/output' folder
-    output_folder = 'static/output'
+    output_folder = "static/output"
     os.makedirs(output_folder, exist_ok=True)
 
-    panorama_path = os.path.join(output_folder, 'panorama_image.jpg')
-    matched_points_path = os.path.join(output_folder, 'matched_points.jpg')
+    panorama_path = os.path.join(output_folder, "panorama_image.jpg")
+    matched_points_path = os.path.join(output_folder, "matched_points.jpg")
 
     cv2.imwrite(panorama_path, result)
     cv2.imwrite(matched_points_path, matched_points)
 
     return panorama_path, matched_points_path
 
-@app.route("/heartbeat", methods = ["GET"])
+
+@app.route("/heartbeat", methods=["GET"])
 def heartbeat():
     heartbeat = time.monotonic_ns()
     return {"heartbeat": heartbeat}, 200
 
-@app.route("/upload", methods=['POST'])
+
+@app.route("/upload", methods=["POST"])
 def upload_image():
     try:
         # check if the post request contains files
@@ -75,7 +86,7 @@ def upload_image():
         for file in files:
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
                 is_uploaded = True
             else:
                 return jsonify({"message": "Invalid file type!"}), 400
@@ -89,28 +100,57 @@ def upload_image():
     except Exception as e:
         return jsonify({"message": e}), 500
 
-@app.route("/stitch", methods=['GET'])
+
+@app.route("/stitch-opencv", methods=["GET"])
 def stitch_api():
     try:
         # Get the list of uploaded files from the 'uploads' directory
         uploaded_files = os.listdir(UPLOAD_FOLDER)
 
         if len(uploaded_files) < 2:
-            return jsonify({"message": "At least two images are required for stitching!"}), 400
+            return (
+                jsonify({"message": "At least two images are required for stitching!"}),
+                400,
+            )
 
-        filename = [os.path.join(UPLOAD_FOLDER, file_name) for file_name in uploaded_files]
+        filename = [
+            os.path.join(UPLOAD_FOLDER, file_name) for file_name in uploaded_files
+        ]
         images = [cv2.imread(file) for file in filename]
 
         panorama_path, matched_points_path = stitch_images(images)
 
-        return jsonify({
-            "message": "Images stitched successfully!",
-            "panorama_image_path": panorama_path,
-            "matched_points_path": matched_points_path
-        }), 200
+        return (
+            jsonify(
+                {
+                    "message": "Images stitched successfully!",
+                    "panorama_image_path": panorama_path,
+                    "matched_points_path": matched_points_path,
+                }
+            ),
+            200,
+        )
 
     except Exception as e:
         return jsonify({"message": str(e)}), 500
+
+
+@app.route("/generate-panorama", methods=["POST"])
+def generate_panorama():
+    try:
+        parent_folder = "/home/basanta/Code/FinalProject/panoramer-api/samples/hills"
+        img_name_list = ["h1.jpg", "h2.jpg", "h3.jpg", "h4.jpg", "h5.jpg", "h6.jpg"]
+
+        obj = Panoramer(parent_folder=parent_folder, img_name_list=img_name_list)
+        obj.generate()
+
+        return jsonify(
+            {"message": "Panorama generated successfully!"},
+            200,
+        )
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+
 
 if __name__ == "__main__":
     app.run(debug=True)

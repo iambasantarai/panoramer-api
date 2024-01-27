@@ -1,26 +1,38 @@
 import numpy as np
 import cv2
 
+
 class Stitcher:
-    def image_stitch(self, images, lowe_ratio=0.75, max_Threshold=4.0, match_status=False):
+    def image_stitch(
+        self, images, lowe_ratio=0.75, max_Threshold=4.0, match_status=False
+    ):
         # detect the features and keypoints from SIFT
         (imageB, imageA) = images
         (key_points_A, features_of_A) = self.detect_feature_and_keypoints(imageA)
         (key_points_B, features_of_B) = self.detect_feature_and_keypoints(imageB)
 
         # get the valid matched points
-        Values = self.match_keypoints(key_points_A, key_points_B, features_of_A, features_of_B, lowe_ratio, max_Threshold)
+        Values = self.match_keypoints(
+            key_points_A,
+            key_points_B,
+            features_of_A,
+            features_of_B,
+            lowe_ratio,
+            max_Threshold,
+        )
         if Values is None:
             return None
 
         # get wrap perspective of image using computed homography
         (matches, Homography, status) = Values
         result_image = self.get_warp_perspective(imageA, imageB, Homography)
-        result_image[0:imageB.shape[0], 0:imageB.shape[1]] = imageB
+        result_image[0 : imageB.shape[0], 0 : imageB.shape[1]] = imageB
 
         # check to see if the keypoint matches should be visualized
         if match_status:
-            vis = self.draw_matches(imageA, imageB, key_points_A, key_points_B, matches, status)
+            vis = self.draw_matches(
+                imageA, imageB, key_points_A, key_points_B, matches, status
+            )
             return result_image, vis
 
         return result_image
@@ -54,7 +66,9 @@ class Stitcher:
     def compute_homography(self, pointsA, pointsB, max_Threshold):
         return cv2.findHomography(pointsA, pointsB, cv2.RANSAC, max_Threshold)
 
-    def match_keypoints(self, KeypointsA, KeypointsB, featuresA, featuresB, lowe_ratio, max_Threshold):
+    def match_keypoints(
+        self, KeypointsA, KeypointsB, featuresA, featuresB, lowe_ratio, max_Threshold
+    ):
         all_matches = self.get_all_possible_matches(featuresA, featuresB)
         valid_matches = self.get_all_valid_matches(all_matches, lowe_ratio)
 
@@ -64,7 +78,9 @@ class Stitcher:
         # construct the two sets of points
         points_A = np.float32([KeypointsA[i] for (_, i) in valid_matches])
         points_B = np.float32([KeypointsB[i] for (i, _) in valid_matches])
-        (homograpgy, status) = self.compute_homography(points_A, points_B, max_Threshold)
+        (homograpgy, status) = self.compute_homography(
+            points_A, points_B, max_Threshold
+        )
         return valid_matches, homograpgy, status
 
     def get_image_dimension(self, image):
@@ -83,7 +99,7 @@ class Stitcher:
         vis = self.get_points(imageA, imageB)
 
         # loop over the matches
-        for ((trainIdx, queryIdx), s) in zip(matches, status):
+        for (trainIdx, queryIdx), s in zip(matches, status):
             if s == 1:
                 ptA = (int(KeypointsA[queryIdx][0]), int(KeypointsA[queryIdx][1]))
                 ptB = (int(KeypointsB[trainIdx][0]) + wA, int(KeypointsB[trainIdx][1]))
