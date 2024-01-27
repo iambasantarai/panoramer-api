@@ -4,7 +4,7 @@ import time
 import shutil
 import imutils
 from pathlib import Path
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from werkzeug.utils import secure_filename
 from stitcher import Stitcher
 from flask_cors import CORS
@@ -14,6 +14,7 @@ app = Flask(__name__)
 CORS(app)
 
 UPLOAD_FOLDER = "uploads"
+RESULTS_FOLDER = "results"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024
 
@@ -207,6 +208,11 @@ def delete_uploads():
 
     except Exception as e:
         return jsonify({"message": str(e)}), 500
+
+
+@app.route("/serve-files/<path:filename>")
+def serve_files(filename):
+    return send_from_directory(os.path.join(UPLOAD_FOLDER, RESULTS_FOLDER), filename)
 
 
 if __name__ == "__main__":
