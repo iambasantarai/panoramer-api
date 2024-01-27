@@ -156,8 +156,18 @@ def generate_panorama():
         panorama = Panoramer(parent_folder=UPLOAD_FOLDER, img_name_list=uploaded_files)
         panorama.generate()
 
+        # get list of generated files
+        results_folder = os.path.join(UPLOAD_FOLDER, "results")
+        generated_files = os.listdir(results_folder)
+        generated_files_paths = [
+            os.path.join(results_folder, file_name) for file_name in generated_files
+        ]
+
         return jsonify(
-            {"message": "Panorama generated successfully!"},
+            {
+                "message": "Panorama generated successfully!",
+                "results": generated_files_paths,
+            },
             200,
         )
     except Exception as e:
