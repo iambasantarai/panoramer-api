@@ -126,20 +126,6 @@ class OptimizationFunction:
 
             iter += 1
 
-    def dogleg(self):
-        pass
-
-    def gauss_newton(self):
-        pass
-
-    def gradient_descent(self):
-        pass
-
-
-######## Function for "fun" and "jac" solely for Homography #######
-### Use as sample to use LM optimization  ####
-
-
 def fun_LM_homography(h, x, x_dash):
     """
     Function to pass to OptimizationFunction
