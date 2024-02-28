@@ -15,7 +15,7 @@ class Panoramer:
         H_all = {}
         for i in range(len(self.img_name_list) - 1):
             print(
-                "#### Processing {} & {} ######".format(
+                "#### Processing {} & {} ####".format(
                     self.img_name_list[i], self.img_name_list[i + 1]
                 )
             )

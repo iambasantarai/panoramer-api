@@ -120,19 +120,19 @@ class RANSAC:
             inlier_count = inliers.shape[0]
 
             print(
-                "prev_inlier_cnt: {}, new_inlier_cnt: {}".format(
+                "\tprev_inlier_cnt: {}, new_inlier_cnt: {}".format(
                     current_inliers_cnt, inlier_count
                 )
             )
 
             if (inlier_count > self.M) and (inlier_count > current_inliers_cnt):
-                print(" #### Found better sample of points. Updating #####")
+                print("#### Found better sample of points. Updating... ####")
                 current_inliers = inliers
                 current_outliers = outliers
                 current_inliers_cnt = inlier_count
                 current_sample_pts = sample_pts
 
-            print(" Done {}/{}".format(no_iter, self.N))
+            print("\tDone {}/{}".format(no_iter, self.N))
 
             no_iter += 1
 
