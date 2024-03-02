@@ -4,3 +4,4 @@ imutils
 matplotlib
 opencv-python
 scipy
+Wand

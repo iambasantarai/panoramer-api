@@ -2,7 +2,7 @@ from ransac import *
 from match_features import *
 from scipy import optimize
 from optimization import *
-
+from crop import crop
 
 class Panoramer:
     def __init__(self, parent_folder, img_name_list):
@@ -96,6 +96,11 @@ class Panoramer:
 
             result_path = os.path.join(result_dir, "panorama_{}.jpg".format(i))
             cv2.imwrite(result_path, canvas_img[:, :, (2, 1, 0)])
+
+            if i == len(self.img_name_list) - 1:
+                final_panorama_path = os.path.join(result_dir, "final_panorama.jpg")
+                crop(result_path, final_panorama_path)
+                print(f"Final panorama image saved at: {final_panorama_path}")
 
     def get_blank_canvas(self, H_all):
         img_path = os.path.join(self.parent_folder, self.img_name_list[0])
