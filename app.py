@@ -170,17 +170,11 @@ def generate_panorama():
 
         for file_name in generated_files:
             if "sift_correspondence" in file_name:
-                grouped_results["sift_correspondences"].append(
-                    os.path.join(results_folder, file_name)
-                )
+                grouped_results["sift_correspondences"].append( file_name)
             elif "inliers" in file_name or "outliers" in file_name:
-                grouped_results["inliers_outliers"].append(
-                    os.path.join(results_folder, file_name)
-                )
+                grouped_results["inliers_outliers"].append(file_name)
             elif "panorama" in file_name:
-                grouped_results["panoramas"].append(
-                    os.path.join(results_folder, file_name)
-                )
+                grouped_results["panoramas"].append(file_name)
 
             # sort files withing each group
             for category, files in grouped_results.items():
