@@ -138,7 +138,7 @@ def stitch_api():
         return jsonify({"message": str(e)}), 500
 
 
-@app.route("/generate-panorama", methods=["POST"])
+@app.route("/generate-panorama", methods=["GET"])
 def generate_panorama():
     try:
         uploaded_files = os.listdir(UPLOAD_FOLDER)
