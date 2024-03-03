@@ -208,6 +208,18 @@ def delete_uploads():
 def serve_files(filename):
     return send_from_directory(os.path.join(UPLOAD_FOLDER, RESULTS_FOLDER), filename)
 
+@app.route("/serve-all-files")
+def serve_all_files():
+    try:
+        results_folder = os.path.join(UPLOAD_FOLDER, RESULTS_FOLDER)
+        files = os.listdir(results_folder)
+
+        file_paths = [os.path.join(results_folder, file) for file in files]
+
+        return jsonify({"files": file_paths}), 200
+
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
