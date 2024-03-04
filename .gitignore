@@ -1,8 +1,0 @@
-# Virtual environment
-venv/
-
-# Uploaded images
-uploads/
-
-# Compiled Python files
-__pycache__/
