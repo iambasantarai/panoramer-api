@@ -6,9 +6,9 @@ import imutils
 from pathlib import Path
 from flask import Flask, request, jsonify, send_from_directory
 from werkzeug.utils import secure_filename
-from stitcher import Stitcher
 from flask_cors import CORS
-from panoramer import *
+from core.stitcher import Stitcher
+from core.panoramer import *
 
 app = Flask(__name__)
 CORS(app)
