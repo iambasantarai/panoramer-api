@@ -3,23 +3,29 @@
 ### Create virtual environment
 
 ```bash
-python3 -m venv venv
+python3 -m venv .venv
 ```
 
 ### Activate the virtual environment
 
 ```bash
-. venv/bin/activate
+source .venv/bin/activate
 ```
 
 ### Install packages
 
 ```bash
-pip install -r requirements.txt
+python3 -m pip install -r requirements.txt
 ```
 
 ### Run flask application
 
 ```bash
 flask run
+```
+
+### Deactivate the virtual environment
+
+```bash
+deactivate
 ```
